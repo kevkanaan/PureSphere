@@ -16,7 +16,7 @@ def get_analysepc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/analysispc.csv', 'w', newline='') as csvfile:
+        with open('../data/water-quality/analysispc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
@@ -39,7 +39,7 @@ def get_operationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/operationpc.csv', 'w', newline='') as csvfile:
+        with open('../data/water-quality/operationpc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
@@ -62,7 +62,7 @@ def get_stationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/stationpc.csv', 'w', newline='') as csvfile:
+        with open('../data/water-quality/stationpc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
