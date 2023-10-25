@@ -16,3 +16,9 @@ The website provides a list of archives, one per year. Each archive contains sev
 - rejets.csv (since 2019)
 - Trait_dechets_dangereux.csv (since 2005)
 - Trait_dechets_non_dangereux.csv (since 2005)
+
+## Scripts
+
+Some scripts are provided in this folder to download and process the data. You can take a look at the header of a script to find out more about its purpose.
+
+Please **run these scripts at the root of the PureSphere project** to ensure proper path management.
