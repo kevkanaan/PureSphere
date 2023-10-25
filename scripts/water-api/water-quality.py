@@ -11,12 +11,12 @@ def get_analysepc(params=None):
         Status code of the response.
     """
     endpoint="https://hubeau.eaufrance.fr/api/v2/qualite_rivieres/analyse_pc.csv"
-    response = requests.get(endpoint, params=params)
+    response = requests.get(endpoint, params=params, timeout=10)
     response.raise_for_status()
 
     # Write the response content to a CSV file
     try:
-        with open('../data/water-quality/analysispc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/analysispc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
@@ -39,7 +39,7 @@ def get_operationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('../data/water-quality/operationpc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/operationpc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
@@ -62,7 +62,7 @@ def get_stationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('../data/water-quality/stationpc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/stationpc.csv', 'w', newline='') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except:
         print("Error while writing the file")
@@ -128,6 +128,28 @@ def get_stationpc_location(latitude, longitude, distance):
     }
     return get_stationpc(params)
 
+def get_analysepc_location_date(latitude, longitude, distance, date):
+    """
+    Makes a GET request to the specified endpoint with optional query parameters.
+
+    Args:
+        latitude (float): Latitude of the location.
+        longitude (float): Longitude of the location.
+        distance (int): Distance in km around the location.
+        date (str): Date of the measurement Example : 2022-09-01.
+
+    Returns:
+        Status code of the response.
+    """
+    params = {
+        "distance": distance,
+        "latitude": latitude,
+        "longitude": longitude,
+        "date": date,
+        "sort": "desc"
+    }
+    return get_analysepc(params)
+
 def main():
     params = {
         "distance": "5",
@@ -146,6 +168,8 @@ def main():
     print(get_analysepc_location(45.782, 4.893, 5))
     print(get_operationpc_location(45.782, 4.893, 5))
     print(get_stationpc_location(45.782, 4.893, 5))
+
+    print(get_analysepc_location_date(45.782, 4.893, 5, "2022-09-01"))
 
 if __name__ == "__main__":
     main()
