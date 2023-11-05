@@ -16,13 +16,6 @@ Project made by 3 INSA Lyon students for the OT7-Data Engineering course of [Ric
 mkdir -p ./dags ./logs ./plugins ./config
 ```
 
-The project has the following structure:
-
-`/dags` - contains the DAG files.\
-`/logs` - contains logs from task execution and scheduler.\
-`/config` - you can add custom log parser or add airflow_local_settings.py to configure cluster policy.\
-`/plugins` - you can put your custom plugins here.
-
 ### Setting the right Airflow user
 
 ```bash
