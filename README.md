@@ -10,19 +10,19 @@ Project made by 3 INSA Lyon students for the OT7-Data Engineering course of [Ric
 > **Note**
 > First time only.
 
-### Create the necessary folders
+Create the necessary folders:
 
 ```bash
 mkdir -p ./dags ./logs ./plugins ./config
 ```
 
-### Setting the right Airflow user
+Setting the right Airflow user:
 
 ```bash
 echo -e "AIRFLOW_UID=$(id -u)" > .env
 ```
 
-### Initialize the database
+Initialize the database:
 
 ```bash
 docker compose up airflow-init
@@ -38,7 +38,7 @@ The webserver is available at: http://localhost:8080. The default account has th
 
 ## Run commands
 
-You can run CLI commands, but you have to do it in one of the defined airflow-* services, ex:
+You can run CLI commands, but you have to do it in one of the defined `airflow-*` services, ex:
 
 ```bash
 docker compose run airflow-worker airflow info
@@ -63,6 +63,6 @@ For more information about a dataset, you can look at its README in the `/script
 ### Data
 
 The retrieved data are stored in the `/data` folder. The data are stored in 3 "zones":
-- the landing zone: the raw data as they are retrieved from the sources
-- the staging zone: the date as they are after each stage of data cleansing
-- the production zone: the final data, completely cleaned, and ready to be used
+- the **landing** zone: the raw data as they are retrieved from the sources
+- the **staging** zone: the date as they are after each stage of data cleansing
+- the **production** zone: the final data, completely cleaned, and ready to be used
