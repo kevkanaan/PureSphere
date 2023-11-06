@@ -48,14 +48,13 @@ docker compose run airflow-worker airflow info
 
 The goal of the project is to implement a full stack data pipeline to answer 2-3 questions formulated in natural language.
 
-We choose the following questions:
-- 
-- 
-- 
+We chose the following questions, focusing on France:
+- What are the zones for which we have information about the air quality and the water quality?
+- Can we see the impact of industrial sites on their surrounding area in terms of air and water quality?
+- ...
 
-To answer them, we use 4 datasets:
+To answer them, we use 3 datasets:
 - Géorisques: the list of industrial facilities releasing pollutants
-- ARIA: the list of industrial accidents
 - Water API: information about water quality
 - OpenAQ: information about air quality
 
