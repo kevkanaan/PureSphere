@@ -59,3 +59,10 @@ To answer them, we use 3 datasets:
 - OpenAQ: information about air quality
 
 For more information about a dataset, you can look at its README in the `/script` folder.
+
+### Data
+
+The retrieved data are stored in the `/data` folder. The data are stored in 3 "zones":
+- the landing zone: the raw data as they are retrieved from the sources
+- the staging zone: the date as they are after each stage of data cleansing
+- the production zone: the final data, completely cleaned, and ready to be used
