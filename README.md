@@ -43,3 +43,20 @@ You can run CLI commands, but you have to do it in one of the defined airflow-* 
 ```bash
 docker compose run airflow-worker airflow info
 ```
+
+## The project
+
+The goal of the project is to implement a full stack data pipeline to answer 2-3 questions formulated in natural language.
+
+We choose the following questions:
+- 
+- 
+- 
+
+To answer them, we use 4 datasets:
+- Géorisques: the list of industrial facilities releasing pollutants
+- ARIA: the list of industrial accidents
+- Water API: information about water quality
+- OpenAQ: information about air quality
+
+For more information about a dataset, you can look at its README in the `/script` folder.
