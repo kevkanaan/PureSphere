@@ -1,0 +1,8 @@
+[MAIN]
+
+disable=
+    missing-module-docstring,
+    missing-function-docstring,
+    expression-not-assigned,
+    line-too-long,
+    missing-timeout
