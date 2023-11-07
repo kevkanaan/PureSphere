@@ -16,9 +16,9 @@ def get_analysepc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/analysispc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/analysispc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
-    except:
+    except FileNotFoundError:
         print("Error while writing the file")
 
     return response.status_code
@@ -39,9 +39,9 @@ def get_operationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/operationpc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/operationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
-    except:
+    except FileNotFoundError:
         print("Error while writing the file")
 
     return response.status_code
@@ -62,9 +62,9 @@ def get_stationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/stationpc.csv', 'w', newline='') as csvfile:
+        with open('./data/water-quality/stationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
-    except:
+    except FileNotFoundError:
         print("Error while writing the file")
 
     return response.status_code
@@ -161,7 +161,7 @@ def main():
     print(f"Calling Analyse Physico-Chimique , response code is : {get_analysepc(params)}")
 
     print(f"Calling Operation Physico-Chimique, response code is : {get_operationpc(params)}")
-    
+
     #For stationpc we don't need to sort because the sort is on The Date of the last measurement
     print(f"Calling Station Physico-Chimique, responde code is : {get_stationpc(params)}")
 
@@ -173,4 +173,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -4,8 +4,8 @@ This script downloads and extracts all the available archives from Géorisques.
 
 import io
 import pathlib
-import requests
 import zipfile
+import requests
 
 def get_name() -> str:
     return 'georisques.download'
@@ -27,8 +27,8 @@ def download_data() -> None:
         link = report['lien']
 
         response = session.get(link)
-        z = zipfile.ZipFile(io.BytesIO(response.content))
-        z.extractall('data/georisques')
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+            archive.extractall('data/georisques')
 
 
 if __name__ == '__main__':
