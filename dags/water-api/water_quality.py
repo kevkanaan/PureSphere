@@ -1,6 +1,6 @@
+from calendar import monthrange
 import requests
 import pandas as pd
-from calendar import monthrange
 
 def get_analysepc(params=None):
     """
@@ -203,27 +203,6 @@ def get_analysepc_location_date(latitude, longitude, distance, date):
     return get_analysepc(params)
 
 def main():
-    params = {
-        "distance": "5",
-        "latitude": "45.782",
-        "longitude": "4.893",
-        "sort": "desc"
-    }
-
-    """"
-    print(f"Calling Analyse Physico-Chimique , response code is : {get_analysepc(params)}")
-
-    print(f"Calling Operation Physico-Chimique, response code is : {get_operationpc(params)}")
-
-    #For stationpc we don't need to sort because the sort is on The Date of the last measurement
-    print(f"Calling Station Physico-Chimique, responde code is : {get_stationpc(params)}")
-
-    print(get_analysepc_location(45.782, 4.893, 5))
-    print(get_operationpc_location(45.782, 4.893, 5))
-    print(get_stationpc_location(45.782, 4.893, 5))
-
-    print(get_analysepc_location_date(45.782, 4.893, 5, "2022-09-01"))
-    """
     print(get_analysepc_filtered_year(2020,"1319,1350,1383,1386"))
 
 if __name__ == "__main__":
