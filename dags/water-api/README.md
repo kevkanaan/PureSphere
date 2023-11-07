@@ -24,6 +24,12 @@ Get_stationpc_location
 
 Get_analysispc_location_date
 
+## Dataset Limitations
+
+The maximum number of rows that we can get for a request is 20 000. To get the rest of the results we need to try and play on some conditions. 
+So what we did is that we selected the four most important chemical components and we filtered in our API Call to get them. 
+The chemical components' codes are : 1319,1350,1383,1386
+
 ## Scripts
 
 Some scripts are provided in this folder to download and process the data. You can take a look at the header of a script to find out more about its purpose. You can also find documentation for each function
