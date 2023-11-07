@@ -58,7 +58,7 @@ To answer them, we use 3 datasets:
 - Water API: information about water quality
 - OpenAQ: information about air quality
 
-For more information about a dataset, you can look at its README in the `/script` folder.
+For more information about a dataset, you can look at its README in the `/dags/<dataset>` folder.
 
 ### Data
 
@@ -66,3 +66,10 @@ The retrieved data are stored in the `/data` folder. The data are stored in 3 "z
 - the **landing** zone: the raw data as they are retrieved from the sources
 - the **staging** zone: the date as they are after each stage of data cleansing
 - the **production** zone: the final data, completely cleaned, and ready to be used
+
+### Pipelines
+
+The pipelines are defined in the `/dags` folder:
+1. `ingest.py`: responsible to bring raw data to the landing zone
+2. `wrangle.py`: responsible to migrate raw data from the landing zone and move them into the staging area (cleaning, wrangling, transformation, etc.)
+3. `enrich.py`: responsible to move the data from the staging zone into the production zone, and trigger the update of data marts (views)
