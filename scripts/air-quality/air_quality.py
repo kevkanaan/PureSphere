@@ -1,8 +1,9 @@
-from bs4 import BeautifulSoup
-from io import StringIO, BytesIO
 import os
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
+from io import StringIO, BytesIO
+from typing import List
 
 def download_stations_details():
     """Download a CSV file containing tons of details about every measuring station used to acquire data.
@@ -13,7 +14,7 @@ def download_stations_details():
     station_metadata_df = pd.read_excel(BytesIO(r.content))
     station_metadata_df.to_csv("data/air-quality/stations_metadata.csv", index=False)
 
-def download_daily_reports(years: list[int]):          
+def download_daily_reports(years: List[int]):
     """ Download daily measures data for all measuring stations and given years.
     
     Keyword arguments:
