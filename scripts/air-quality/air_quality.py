@@ -1,9 +1,11 @@
 import os
-import pandas as pd
 import requests
+
 from bs4 import BeautifulSoup
 from io import StringIO, BytesIO
 from typing import List
+
+import pandas as pd
 
 def download_stations_details():
     """Download a CSV file containing tons of details about every measuring station used to acquire data.
