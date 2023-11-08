@@ -1,2 +1,5 @@
 requests
 pandas
+beautifulsoup4
+xlrd
+pyarrow
