@@ -1,10 +1,10 @@
 import os
-import requests
 
-from bs4 import BeautifulSoup
 from io import StringIO, BytesIO
 from typing import List
+from bs4 import BeautifulSoup
 
+import requests
 import pandas as pd
 
 def download_stations_details():
