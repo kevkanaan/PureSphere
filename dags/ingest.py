@@ -7,6 +7,7 @@ from airflow.operators.python import PythonOperator
 
 import georisques.download as georisques_download
 from air_quality.air_quality import download_stations_details, download_daily_reports
+from water_api.water_quality import get_analysepc_filtered_year
 
 with DAG(
     dag_id='ingest',
@@ -34,7 +35,9 @@ with DAG(
 
     @task_group(group_id="water_api_ingestion")
     def water_api_ingestion():
-        get_water_api_data = EmptyOperator(task_id="get_water_api_data")
+        get_water_api_data = PythonOperator(task_id="get_water_api_data",
+                                            python_callable=get_analysepc_filtered_year,
+                                            op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"})
     
     end = EmptyOperator(task_id="ingestion_finished")
 

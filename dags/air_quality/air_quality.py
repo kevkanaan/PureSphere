@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 
-LANDING_ZONE_PATH = "/opt/airflow/dags/data/landing/air-quality/"
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/air-quality/"
 
 def download_stations_details():
     """Download a CSV file containing tons of details about every measuring station used to acquire data.

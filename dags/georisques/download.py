@@ -7,7 +7,7 @@ import pathlib
 import zipfile
 import requests
 
-LANDING_ZONE_PATH = "/opt/airflow/dags/data/landing/georisques/"
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/georisques/"
 
 def download_data() -> None:
     session = requests.Session()
