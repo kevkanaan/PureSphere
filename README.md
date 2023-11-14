@@ -44,6 +44,10 @@ You can run CLI commands, but you have to do it in one of the defined `airflow-*
 docker compose run airflow-worker airflow info
 ```
 
+## Dependencies
+
+We can add Python dependencies through the `requirements.txt` file. Keep in mind that when a new dependency is added, you have to rebuild the image. See the [Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#special-case-adding-dependencies-via-requirements-txt-file) for more information.
+
 ## The project
 
 The goal of the project is to implement a full stack data pipeline to answer 2-3 questions formulated in natural language.
