@@ -6,8 +6,8 @@ from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 
 import georisques.download as georisques_download
-from air_quality.air_quality import download_stations_details, download_daily_reports
-from water_api.water_quality import get_analysepc_filtered_year
+from air_quality.download import download_stations_details, download_daily_reports
+from water_api.download import get_analysepc_filtered_year
 
 with DAG(
     dag_id='ingest',
