@@ -35,10 +35,10 @@ with DAG(
 
     @task_group(group_id="water_api_ingestion")
     def water_api_ingestion():
-        get_water_api_data = PythonOperator(task_id="get_water_api_data",
-                                            python_callable=get_analysepc_filtered_year,
-                                            op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"})
-    
+        PythonOperator(task_id="get_water_api_data",
+                       python_callable=get_analysepc_filtered_year,
+                       op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"})
+
     end = EmptyOperator(task_id="ingestion_finished")
 
     start >> georisques() >> end

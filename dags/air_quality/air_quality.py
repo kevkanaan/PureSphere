@@ -1,5 +1,4 @@
 import os
-import glob
 
 from io import StringIO, BytesIO
 from typing import List
@@ -21,7 +20,7 @@ def download_stations_details():
 
 def download_daily_reports(years: List[int]):
     """ Download daily measures data for all measuring stations and given years.
-    
+
     Keyword arguments:
     years -- list of years for which to retrieve data. You can't download data before 2021 (>=2021)
 
