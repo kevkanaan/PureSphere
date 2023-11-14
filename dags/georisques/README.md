@@ -8,8 +8,8 @@ Data from: https://georisques.gouv.fr/donnees/bases-de-donnees/installations-ind
 
 The website provides a list of archives, one per year. Each archive contains several CSV files (some of them are not available for all years):
 
-- `emissions.csv`
-- `etablissements.csv`
+- `emissions.csv`: quantity of each pollutant discharged over the year by a company
+- `etablissements.csv`: list of companies with their details (location, etc.)
 - `Prelevements.csv`
 - `Prod_dechets_dangereux.csv`
 - `Prod_dechets_non_dangereux.csv` (since 2007)
