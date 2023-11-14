@@ -2,6 +2,8 @@ from calendar import monthrange
 import requests
 import pandas as pd
 
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
+
 def get_analysepc(params=None):
     """
     Makes a GET request to the specified endpoint with optional query parameters.
@@ -19,7 +21,7 @@ def get_analysepc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/analysispc.csv', 'wb', newline='', encoding='utf-8') as csvfile:
+        with open(LANDING_ZONE_PATH + 'analysispc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except FileNotFoundError as e:
         print("Error while writing the file", str(e))
@@ -42,7 +44,7 @@ def get_operationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/operationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        with open(LANDING_ZONE_PATH + 'operationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except FileNotFoundError:
         print("Error while writing the file")
@@ -65,7 +67,7 @@ def get_stationpc(params=None):
 
     # Write the response content to a CSV file
     try:
-        with open('./data/water-quality/stationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        with open(LANDING_ZONE_PATH + 'stationpc.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvfile.write(response.content.decode('utf-8'))
     except FileNotFoundError:
         print("Error while writing the file")
@@ -128,7 +130,7 @@ def get_analysepc_filtered_year(year, chemical_components):
         status_code = get_analysepc(params)
         print(f"Response code is {status_code}")
         # Read the results into a DataFrame
-        df_month = pd.read_csv('./data/water-quality/analysispc.csv', encoding='ISO-8859-1', sep=';')
+        df_month = pd.read_csv(LANDING_ZONE_PATH + 'analysispc.csv', encoding='ISO-8859-1', sep=';')
 
         # Append the results to the main DataFrame
         df = pd.concat([df, df_month], ignore_index=True)
@@ -136,7 +138,7 @@ def get_analysepc_filtered_year(year, chemical_components):
         print(f"Finished processing month {month}")
 
     # Write the main DataFrame to a CSV file
-    df.to_csv(f'./data/water-quality/analysispc_{year}.csv', index=False)
+    df.to_csv(LANDING_ZONE_PATH + f'analysispc_{year}.csv', index=False)
 
     return status_code
 

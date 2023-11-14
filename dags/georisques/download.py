@@ -7,8 +7,7 @@ import pathlib
 import zipfile
 import requests
 
-def get_name() -> str:
-    return 'georisques.download'
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/georisques/"
 
 def download_data() -> None:
     session = requests.Session()
@@ -19,7 +18,7 @@ def download_data() -> None:
         if not report: # report not available (e.g. 2022 and 2023)
             continue
 
-        if pathlib.Path(f'data/georisques/{year}').exists():
+        if pathlib.Path(LANDING_ZONE_PATH+f'{year}').exists():
             print(f'{year} already downloaded')
             continue
 
@@ -28,8 +27,4 @@ def download_data() -> None:
 
         response = session.get(link)
         with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
-            archive.extractall('data/georisques')
-
-
-if __name__ == '__main__':
-    download_data()
+            archive.extractall(LANDING_ZONE_PATH)

@@ -5,4 +5,5 @@ disable=
     missing-function-docstring,
     expression-not-assigned,
     line-too-long,
-    missing-timeout
+    missing-timeout,
+    pointless-statement
