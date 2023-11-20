@@ -31,7 +31,7 @@ with DAG(
 
         fourth_step = PythonOperator(task_id="aggregate_measurement_by_site_code_and_pollutant_type",
                                     python_callable=aggregate_measurement_by_site_code_and_pollutant_type)
-       
+
         fifth_step = SparkSubmitOperator(task_id="merge_daily_files",
                                           conn_id="spark-conn",
                                           application="/opt/airflow/jobs/air-quality/merge_daily_reports.py")

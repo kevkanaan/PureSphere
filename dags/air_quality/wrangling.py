@@ -1,6 +1,6 @@
 import os
-
 import glob
+from typing import Dict, List
 from pyarrow import parquet
 import pandas as pd
 
@@ -14,7 +14,7 @@ def get_stations_metadata_dataframe():
 
 def get_landing_zone_files():
     files = [file for file in glob.glob(LANDING_ZONE_PATH+r"*") if str(file[-4:]).isdigit()]
-    measurement_reports_per_year: dict[int, list[str]] = {}
+    measurement_reports_per_year: Dict[int, List[str]] = {}
     for file in files:
         measurement_reports = glob.glob(file+"/FR_E2_*")
         measurement_reports_per_year[int(file[-4:])] = measurement_reports
@@ -22,7 +22,7 @@ def get_landing_zone_files():
 
 def get_previous_wrangling_step_files(previous_step: str):
     files = list(glob.glob(STAGING_ZONE_PATH+f"{previous_step}/*"))
-    measurement_reports_per_year: dict[int, list[str]] = {}
+    measurement_reports_per_year: Dict[int, List[str]] = {}
     for file in files:
         measurement_reports = glob.glob(file+"/FR_E2_*")
         measurement_reports_per_year[int(file[-4:])] = measurement_reports
