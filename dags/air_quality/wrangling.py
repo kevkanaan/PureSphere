@@ -6,8 +6,6 @@ import pandas as pd
 
 STAGING_ZONE_PATH = "/opt/airflow/data/staging/air-quality/"
 LANDING_ZONE_PATH = "/opt/airflow/data/landing/air-quality/"
-# STAGING_ZONE_PATH = "data/staging/air-quality/"
-# LANDING_ZONE_PATH = "data/landing/air-quality/"
 
 def get_stations_metadata_dataframe():
     return pd.read_csv(LANDING_ZONE_PATH+"stations_metadata.csv")
