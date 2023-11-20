@@ -5,7 +5,7 @@ x-spark-common: &spark-common
   image: bitnami/spark:latest
   volumes:
     - ./jobs:/opt/bitnami/spark/jobs
-    - ./data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data:rw
 
 x-airflow-common:
   &airflow-common

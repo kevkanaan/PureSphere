@@ -36,6 +36,17 @@ docker compose up
 
 The webserver is available at: http://localhost:8080. The default account has the login `airflow` and the password `airflow`.
 
+## Set up Spark connection
+Within Airflow webserver, create a new connection to Spark. To do so:
+- Go into Admin > Connections
+- Click on **+** to configure a new connection
+- Create the Spark connection with the following parameters:
+    - *Connection Id*: ```spark-conn```
+    - *Connection Type*: ```Spark```
+    - *Host*: ```spark://spark-master```
+    - *Port*: ```7077```
+- Save this new connection and Airflow is properly connected to Spark!
+
 ## Run commands
 
 You can run CLI commands, but you have to do it in one of the defined `airflow-*` services, ex:
