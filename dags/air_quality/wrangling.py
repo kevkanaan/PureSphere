@@ -93,7 +93,7 @@ def create_sql_script_air_quality_table():
     air_quality_sql_scripts_path = DAGS_ZONE_PATH+"air_quality/sql_scripts/"
     if not os.path.exists(air_quality_sql_scripts_path):
         os.makedirs(air_quality_sql_scripts_path)
-    with open(air_quality_sql_scripts_path+"create_air_quality_table.sql", "w") as f:
+    with open(air_quality_sql_scripts_path+"create_air_quality_table.sql", "w", encoding="utf-8") as f:
         f.write("CREATE TABLE IF NOT EXISTS air_quality_measurements (\n"
             "code_site VARCHAR(255),\n"
             "polluant VARCHAR(255),\n"
@@ -104,6 +104,6 @@ def create_sql_script_air_quality_table():
             "nombre_de_mesures INT,\n"
             "unite_de_mesure VARCHAR(255)\n"
             "date DATE\n);\n")
-        
-        for index, row in measurements_cleaned_data.iterrows():
-            f.write(f"INSERT INTO air_quality_measurements VALUES "+str(tuple(row.values))+";\n")
+
+        for row in measurements_cleaned_data.itertuples(index=False):
+            f.write("INSERT INTO air_quality_measurements VALUES "+str(tuple(row.values))+";\n")

@@ -1,12 +1,11 @@
 from datetime import datetime
-from enum import auto
 
 from airflow import DAG
 from airflow.decorators import task_group
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 from air_quality.wrangling import remove_invalid_measurements, drop_useless_columns, aggregate_measurement_by_site_code_and_pollutant_type, create_sql_script_air_quality_table
@@ -41,11 +40,11 @@ with DAG(
                                           conn_id="spark-conn",
                                           application="/opt/airflow/jobs/air-quality/merge_daily_reports.py",
                                           trigger_rule="all_success")
-        
+
         sixth_step = PythonOperator(task_id="create_sql_script_air_quality_table",
                                    python_callable=create_sql_script_air_quality_table,
                                    trigger_rule="all_success")
-        
+
         seventh_step = PostgresOperator(task_id="create_air_quality_table",
                                         postgres_conn_id="postgres_conn_id",
                                         sql="air_quality/sql_scripts/create_air_quality_table.sql",
