@@ -6,6 +6,7 @@ import pandas as pd
 
 STAGING_ZONE_PATH = "/opt/airflow/data/staging/air-quality/"
 LANDING_ZONE_PATH = "/opt/airflow/data/landing/air-quality/"
+DAGS_ZONE_PATH = "/opt/airflow/dags/"
 
 def get_stations_metadata_dataframe():
     return pd.read_csv(LANDING_ZONE_PATH+"stations_metadata.csv")
@@ -86,3 +87,23 @@ def aggregate_measurement_by_site_code_and_pollutant_type():
                 }, axis="columns", errors="raise", inplace=True)
 
                 measurement_report_aggregated_by_station_and_pollutant.to_parquet("/".join([folder_name, report_name]))
+
+def create_sql_script_air_quality_table():
+    measurements_cleaned_data = pd.read_parquet(STAGING_ZONE_PATH+"measurements_file.parquet")
+    air_quality_sql_scripts_path = DAGS_ZONE_PATH+"air_quality/sql_scripts/"
+    if not os.path.exists(air_quality_sql_scripts_path):
+        os.makedirs(air_quality_sql_scripts_path)
+    with open(air_quality_sql_scripts_path+"create_air_quality_table.sql", "w") as f:
+        f.write("CREATE TABLE IF NOT EXISTS air_quality_measurements (\n"
+            "code_site VARCHAR(255),\n"
+            "polluant VARCHAR(255),\n"
+            "moyenne FLOAT,\n"
+            "min FLOAT,\n"
+            "max FLOAT,\n"
+            "ecart_type FLOAT,\n"
+            "nombre_de_mesures INT,\n"
+            "unite_de_mesure VARCHAR(255)\n"
+            "date DATE\n);\n")
+        
+        for index, row in measurements_cleaned_data.iterrows():
+            f.write(f"INSERT INTO air_quality_measurements VALUES "+str(tuple(row.values))+";\n")

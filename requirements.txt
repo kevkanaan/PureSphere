@@ -3,5 +3,6 @@ pandas
 beautifulsoup4
 xlrd
 pyarrow
-apache-airflow-providers-apache-spark
 pyspark
+apache-airflow[postgres]
+apache-airflow-providers-apache-spark
