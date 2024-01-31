@@ -6,3 +6,4 @@ pyarrow
 pyspark
 apache-airflow[postgres]
 apache-airflow-providers-apache-spark
+geopy

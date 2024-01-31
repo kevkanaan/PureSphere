@@ -6,8 +6,11 @@ from airflow.operators.empty import EmptyOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.utils.helpers import chain
+from airflow.utils.trigger_rule import TriggerRule
 
 from air_quality.wrangling import remove_invalid_measurements, drop_useless_columns, aggregate_measurement_by_site_code_and_pollutant_type, create_air_quality_station_sql_table, create_air_quality_measurements_sql_table
+import georisques.wrangling
 
 with DAG(
     dag_id='wrangling',
@@ -50,9 +53,21 @@ with DAG(
 
         first_step >> second_step >> third_step >> fourth_step >> fifth_step >> sixth_step >> seventh_step
 
+
     @task_group(group_id="georisque_wrangling")
     def georisques_wrangling():
-        EmptyOperator(task_id="georisque_wrangling")
+        tasks = [
+            PythonOperator(
+                task_id=step.__name__,
+                python_callable=georisques.wrangling.execute_step,
+                op_kwargs={'step_index': index},
+                 trigger_rule=TriggerRule.NONE_FAILED, # if one step is skipped, execute the next one
+            )
+            for index, step in enumerate(georisques.wrangling.STEPS, 1)
+        ]
+
+        chain(*tasks)
+
 
     @task_group(group_id="water_quality_wrangling")
     def water_quality_wrangling():
