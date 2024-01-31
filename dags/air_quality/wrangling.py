@@ -1,12 +1,15 @@
+from hmac import new
 import os
 import glob
 from typing import Dict, List
 from pyarrow import parquet
 import pandas as pd
+from sqlalchemy import create_engine
+import sqlalchemy
+from sqlalchemy_utils import create_database, database_exists
 
 STAGING_ZONE_PATH = "/opt/airflow/data/staging/air-quality/"
 LANDING_ZONE_PATH = "/opt/airflow/data/landing/air-quality/"
-DAGS_ZONE_PATH = "/opt/airflow/dags/"
 
 def get_stations_metadata_dataframe():
     return pd.read_csv(LANDING_ZONE_PATH+"stations_metadata.csv")
@@ -78,32 +81,81 @@ def aggregate_measurement_by_site_code_and_pollutant_type():
                 measurement_report_aggregated_by_station_and_pollutant.columns = measurement_report_aggregated_by_station_and_pollutant.columns.map('|'.join).str.strip('|')
                 # Rename columns
                 measurement_report_aggregated_by_station_and_pollutant.rename({
-                    "valeur brute|mean": "moyenne",
+                    "valeur brute|mean": "mean",
                     "valeur brute|max": "max",
                     "valeur brute|min": "min",
-                    "valeur brute|std": "écart-type",
-                    "valeur brute|count": "nombre de mesures",
-                    "unité de mesure|<lambda>": "unité de mesure",
+                    "valeur brute|std": "std",
+                    "valeur brute|count": "number_of_measurements",
+                    "unité de mesure|<lambda>": "measurement_unit",
                 }, axis="columns", errors="raise", inplace=True)
 
                 measurement_report_aggregated_by_station_and_pollutant.to_parquet("/".join([folder_name, report_name]))
 
-def create_sql_script_air_quality_table():
-    measurements_cleaned_data = pd.read_parquet(STAGING_ZONE_PATH+"measurements_file.parquet")
-    air_quality_sql_scripts_path = DAGS_ZONE_PATH+"air_quality/sql_scripts/"
-    if not os.path.exists(air_quality_sql_scripts_path):
-        os.makedirs(air_quality_sql_scripts_path)
-    with open(air_quality_sql_scripts_path+"create_air_quality_table.sql", "w", encoding="utf-8") as f:
-        f.write("CREATE TABLE IF NOT EXISTS air_quality_measurements (\n"
-            "code_site VARCHAR(255),\n"
-            "polluant VARCHAR(255),\n"
-            "moyenne FLOAT,\n"
-            "min FLOAT,\n"
-            "max FLOAT,\n"
-            "ecart_type FLOAT,\n"
-            "nombre_de_mesures INT,\n"
-            "unite_de_mesure VARCHAR(255)\n"
-            "date DATE\n);\n")
+def create_air_quality_station_sql_table():
+    engine = create_engine("postgresql://airflow:airflow@postgres:5432/staging")
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    # Get the stations metadata and clean it
+    stations_metadata = get_stations_metadata_dataframe()
+    stations_metadata.rename({"GMLID": "gmlid",
+                              "LocalId": "local_id",
+                              "Namespace": "namespace",
+                              "Version": "version",
+                              "NatlStationCode": "national_station_code",
+                              "Name": "name",
+                              "Municipality": "municipality",
+                              "EUStationCode": "eu_station_code",
+                              "ActivityBegin": "activity_begin",
+                              "ActivityEnd": "activity_end",
+                              "Latitude": "latitude",
+                              "Longitude": "longitude",
+                              "SRSName": "srs_name",
+                              "Altitude": "altitude",
+                              "AltitudeUnit": "altitude_unit",
+                              "AreaClassification": "area_classification",
+                              "BelongsTo": "belongs_to"}, axis="columns", inplace=True)
+    stations_metadata.fillna("NULL", inplace=True)
+    stations_metadata.replace(to_replace="'", value="-", inplace=True, regex=True)
+    stations_metadata.drop_duplicates(subset=["national_station_code"], inplace=True)
+    if not sqlalchemy.inspect(engine).has_table("air_quality_stations"):
+        with engine.connect() as conn:
+            stations_metadata.to_sql("air_quality_stations", conn, if_exists="replace", index=False)
+            conn.execute("ALTER TABLE air_quality_stations ADD CONSTRAINT pk_aq_stations PRIMARY KEY(national_station_code);")
+    else:
+        existing_stations = pd.read_sql_table("air_quality_stations", engine)
+        new_stations = pd.concat([existing_stations, stations_metadata]).drop_duplicates(keep=False)
+        if not new_stations.empty:
+            with engine.connect() as conn:
+                new_stations.to_sql("air_quality_stations", conn, if_exists="append", index=False)
 
-        for row in measurements_cleaned_data.itertuples(index=False):
-            f.write("INSERT INTO air_quality_measurements VALUES "+str(tuple(row.values))+";\n")
+def create_air_quality_measurements_sql_table():
+    # Create the staging database if it does not exist
+    engine = create_engine("postgresql://airflow:airflow@postgres:5432/staging")
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    # Create the air_quality_measurements table
+    measurements_cleaned_data = pd.read_parquet(STAGING_ZONE_PATH+"measurements_file.parquet")
+    measurements_cleaned_data.rename({"code site": "national_station_code",
+                                      "Polluant": "pollutant",
+                                      "moyenne": "mean",
+                                      "min": "min",
+                                      "max": "max",
+                                      "écart-type": "std",
+                                      "nombre de mesures": "number_of_measurements",
+                                      "unité de mesure": "measurement_unit",
+                                      "Date": "date"}, axis="columns", inplace=True)
+    # Retrieve the stations codes from the stations table
+    result = engine.execute("SELECT national_station_code FROM air_quality_stations;").fetchall()
+    stations_code = [code[0] for code in result]
+    measurements_cleaned_data = measurements_cleaned_data[measurements_cleaned_data['national_station_code'].isin(stations_code)]
+    if not sqlalchemy.inspect(engine).has_table("air_quality_measurements"):
+        with engine.connect() as conn:
+            measurements_cleaned_data.to_sql("air_quality_measurements", conn, if_exists="replace", index=False)
+            conn.execute("ALTER TABLE air_quality_measurements ADD CONSTRAINT pk_aq_measurements PRIMARY KEY(national_station_code, pollutant, date);")
+            conn.execute("ALTER TABLE air_quality_measurements ADD CONSTRAINT fk_aq_measurements FOREIGN KEY(national_station_code) REFERENCES air_quality_stations(national_station_code);")
+    else:
+        existing_measurements = pd.read_sql_table("air_quality_measurements", engine)
+        new_measurements = pd.concat([existing_measurements, measurements_cleaned_data]).drop_duplicates(keep=False)
+        if not new_measurements.empty:
+            with engine.connect() as conn:
+                new_measurements.to_sql("air_quality_measurements", conn, if_exists="append", index=False)

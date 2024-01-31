@@ -7,8 +7,9 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from anyio import TASK_STATUS_IGNORED
 
-from air_quality.wrangling import remove_invalid_measurements, drop_useless_columns, aggregate_measurement_by_site_code_and_pollutant_type, create_sql_script_air_quality_table
+from air_quality.wrangling import remove_invalid_measurements, drop_useless_columns, aggregate_measurement_by_site_code_and_pollutant_type, create_air_quality_station_sql_table, create_air_quality_measurements_sql_table
 
 with DAG(
     dag_id='wrangling',
@@ -41,15 +42,13 @@ with DAG(
                                           application="/opt/airflow/jobs/air-quality/merge_daily_reports.py",
                                           trigger_rule="all_success")
 
-        sixth_step = PythonOperator(task_id="create_sql_script_air_quality_table",
-                                   python_callable=create_sql_script_air_quality_table,
+        sixth_step = PythonOperator(task_id="create_air_quality_stations_sql_table",
+                                      python_callable=create_air_quality_station_sql_table,
+                                      trigger_rule="all_success")
+        
+        seventh_step = PythonOperator(task_id="create_air_quality_measurements_sql_table",
+                                   python_callable=create_air_quality_measurements_sql_table,
                                    trigger_rule="all_success")
-
-        seventh_step = PostgresOperator(task_id="create_air_quality_table",
-                                        postgres_conn_id="postgres_conn_id",
-                                        sql="air_quality/sql_scripts/create_air_quality_table.sql",
-                                        trigger_rule="all_success",
-                                        autocommit=True)
 
         first_step >> second_step >> third_step >> fourth_step >> fifth_step >> sixth_step >> seventh_step
 
