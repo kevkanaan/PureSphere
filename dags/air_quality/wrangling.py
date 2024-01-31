@@ -1,4 +1,3 @@
-from hmac import new
 import os
 import glob
 from typing import Dict, List
