@@ -1,8 +1,10 @@
 from calendar import monthrange
+import os
 import requests
 import pandas as pd
 
-LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
+#LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
+LANDING_ZONE_PATH = "./data/landing/water-quality/"
 
 def get_analysepc(params=None):
     """
@@ -108,6 +110,11 @@ def get_analysepc_filtered_year(year, chemical_components):
     # Initialize an empty DataFrame to store the results
     df = pd.DataFrame()
 
+    #Check if the excel with the correct year exists already before downloading
+    if os.path.exists(LANDING_ZONE_PATH + f'analysispc_{year}'):
+        print(f"File analysispc_{year} already exists")
+        return 200
+
     # Loop over each month of the year
     for month in range(1, 13):
         print(f"Processing month {month}...")
@@ -136,9 +143,12 @@ def get_analysepc_filtered_year(year, chemical_components):
         df = pd.concat([df, df_month], ignore_index=True)
 
         print(f"Finished processing month {month}")
-
+    #Delete the analysispc.csv file
+    os.remove(LANDING_ZONE_PATH + 'analysispc.csv')
     # Write the main DataFrame to a CSV file
-    df.to_csv(LANDING_ZONE_PATH + f'analysispc_{year}.csv', index=False)
+    df = df.astype(str)
+
+    df.to_parquet(LANDING_ZONE_PATH + f'analysispc_{year}', index=False)
 
     return status_code
 
@@ -205,7 +215,11 @@ def get_analysepc_location_date(latitude, longitude, distance, date):
     return get_analysepc(params)
 
 def main():
-    print(get_analysepc_filtered_year(2020,"1319,1350,1383,1386"))
+    params = {
+            "size": 20000
+        }
+
+    print(get_stationpc(params))
 
 if __name__ == "__main__":
     main()
