@@ -550,7 +550,15 @@ You can find below the list of columns for each file.
 
 ## Wrangling
 
-It will certainly be necessary to work on locating events, as the `coordonnees_x` and `coordonnees_y` columns in the `etablissements.csv` file are often filled with unusable values. For example, we could use an API that returns latitude and longitude from a text address.
+As the `coordonnees_x` and `coordonnees_y` columns in the `etablissements.csv` file are often filled with unusable values, it is necessary to locate the coordinates of the addresses. To do so, we use the [GeoPy](https://geopy.readthedocs.io/en/stable/) library. Using a free service, it takes several hours to retrieve all the addresses. We therefore provide a JSON file already containing the preloaded addresses, to speed things up.
+
+Here are the wrangling steps that are performed:
+
+1. remove_unwanted_files
+1. remove_unwanted_columns
+1. strip_columns_name
+1. strip_data
+1. retrieve_coordinates
 
 ## Scripts
 

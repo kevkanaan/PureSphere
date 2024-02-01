@@ -10,23 +10,28 @@ import io
 import pathlib
 import zipfile
 import requests
-
-LANDING_ZONE_PATH = '/opt/airflow/data/landing/georisques/'
-RETRIEVED_YEAR = '2021'
+from georisques.constants import DATA_PATH, RETRIEVE_FROM_YEAR
 
 def download_data() -> None:
     session = requests.Session()
 
     available_reports = session.get('https://georisques.gouv.fr/webappReport/ws/telechargement/irep').json()
-    report = available_reports['annuel'][RETRIEVED_YEAR]
 
-    if pathlib.Path(LANDING_ZONE_PATH+f'{RETRIEVED_YEAR}').exists():
-        print(f'{RETRIEVED_YEAR} data already downloaded')
-        return
+    for year, report in available_reports['annuel'].items():
+        if year < RETRIEVE_FROM_YEAR or not report: # report too old or not available (e.g. 2023)
+            continue
 
-    print(f'Downloading {RETRIEVED_YEAR} data')
-    link = report['lien']
+        if pathlib.Path(DATA_PATH['LANDING_ZONE'] + f'{year}').exists():
+            print(f'{year} already downloaded')
+            continue
 
-    response = session.get(link)
-    with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
-        archive.extractall(LANDING_ZONE_PATH)
+        print(f'Downloading {year} data')
+        link = report['lien']
+
+        response = session.get(link)
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+            archive.extractall(DATA_PATH['LANDING_ZONE'])
+
+
+if __name__ == '__main__':
+    download_data()
