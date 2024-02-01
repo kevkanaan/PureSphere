@@ -67,15 +67,24 @@ def strip_data(working_folder: str):
             df.to_csv(os.path.join(sub_folder, file), index=False)
 
 
+def get_cached_addresses() -> dict:
+    try:
+        with open(DATA_PATH['STAGING_ZONE'] + 'addresses.json', encoding='utf-8') as json_file:
+            return json.load(json_file)
+    except FileNotFoundError:
+        return {}
+
+
+def save_cached_addresses(cached_addresses: dict) -> None:
+    with open(DATA_PATH['STAGING_ZONE'] + 'addresses.json', 'w', encoding='utf-8') as outfile:
+        json.dump(cached_addresses, outfile, ensure_ascii=False)
+
+
 def retrieve_coordinates(working_folder: str):
     geolocator = Nominatim(user_agent='PureSphere')
     geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
 
-    try:
-        with open('data.json', encoding='utf-8') as json_file:
-            cached_addresses = json.load(json_file)
-    except FileNotFoundError:
-        cached_addresses = {}
+    cached_addresses = get_cached_addresses()
 
     def find_coordinates(row: pandas.Series) -> pandas.Series:
         keys = ['adresse', 'code_postal', 'commune', 'departement', 'region']
@@ -107,8 +116,7 @@ def retrieve_coordinates(working_folder: str):
         )
         etablissements_df.to_csv(etablissements_csv_path, index=False)
 
-    with open('data.json', 'w', encoding='utf-8') as outfile:
-        json.dump(cached_addresses, outfile)
+    save_cached_addresses(cached_addresses)
 
 
 STEPS = [
