@@ -63,10 +63,9 @@ We can add Python dependencies through the `requirements.txt` file. Keep in mind
 
 The goal of the project is to implement a full stack data pipeline to answer 2-3 questions formulated in natural language.
 
-We chose the following questions, focusing on France:
+We chose the following questions, focusing on France in 2021:
 - What are the zones for which we have information about the air quality and the water quality?
 - Can we see the impact of industrial sites on their surrounding area in terms of air and water quality?
-- ...
 
 To answer them, we use 3 datasets:
 - Géorisques: the list of industrial facilities releasing pollutants

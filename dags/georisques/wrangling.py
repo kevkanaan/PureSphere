@@ -8,7 +8,9 @@ import os
 from distutils.dir_util import copy_tree
 from airflow.exceptions import AirflowSkipException
 import pandas
-from georisques.constants import DATA_PATH, KEPT_FILES
+import sqlalchemy
+from sqlalchemy_utils import create_database, database_exists
+from georisques.constants import DATA_PATH, KEPT_FILES, STUDIED_YEAR
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
@@ -118,6 +120,69 @@ def retrieve_coordinates(working_folder: str):
 
     save_cached_addresses(cached_addresses)
 
+def create_georisques_etablissements_studied_year_sql_table(working_folder: str):
+    etablissements_studied_year_df = pandas.read_csv(os.path.join(working_folder, STUDIED_YEAR ,'etablissements.csv'), dtype={'code_postal': str})
+    engine = sqlalchemy.create_engine("postgresql://airflow:airflow@postgres:5432/staging")
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    table_name = "georisques_etablissements_"+STUDIED_YEAR
+    if not sqlalchemy.inspect(engine).has_table(table_name):
+        with engine.connect() as conn:
+            etablissements_studied_year_df.to_sql(table_name, conn, if_exists="replace", index=False)
+            conn.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT pk_{table_name} PRIMARY KEY(identifiant);")
+    else:
+        existing_etablissements = pandas.read_sql_table(table_name, engine)
+        new_etablissements = pandas.concat([etablissements_studied_year_df, existing_etablissements]).drop_duplicates(keep=False)
+        if not new_etablissements.empty:
+            with engine.connect() as conn:
+                new_etablissements.to_sql(table_name, conn, if_exists="append", index=False)
+
+def create_georisques_emissions_studied_year_sql_table(working_folder: str):
+    emissions_studied_year_df = pandas.read_csv(os.path.join(working_folder, STUDIED_YEAR ,'emissions.csv'), dtype={'code_postal': str})
+
+    engine = sqlalchemy.create_engine("postgresql://airflow:airflow@postgres:5432/staging")
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    # Drop the emissions linked to an etablissement that is not in the studied year etablissements table
+    result = engine.execute(f"SELECT identifiant FROM georisques_etablissements_{STUDIED_YEAR};").fetchall()
+    etablissements_ids = [id[0] for id in result]
+    emissions_studied_year_df = emissions_studied_year_df[emissions_studied_year_df['identifiant'].isin(etablissements_ids)]
+
+    table_name = "georisques_emissions_"+STUDIED_YEAR
+    if not sqlalchemy.inspect(engine).has_table(table_name):
+        with engine.connect() as conn:
+            emissions_studied_year_df.to_sql(table_name, conn, if_exists="replace", index=False)
+            conn.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT pk_{table_name} PRIMARY KEY(identifiant, milieu, polluant);")
+            conn.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT fk_{table_name} FOREIGN KEY(identifiant) REFERENCES georisques_etablissements_{STUDIED_YEAR}(identifiant);")
+    else:
+        existing_emissions = pandas.read_sql_table(table_name, engine)
+        new_emissions = pandas.concat([emissions_studied_year_df, existing_emissions]).drop_duplicates(keep=False)
+        if not new_emissions.empty:
+            with engine.connect() as conn:
+                new_emissions.to_sql(table_name, conn, if_exists="append", index=False)
+
+def create_georisques_rejets_studied_year_sql_table(working_folder: str):
+    rejets_studied_year_df = pandas.read_csv(os.path.join(working_folder, STUDIED_YEAR ,'rejets.csv'), dtype={'code_postal': str})
+    engine = sqlalchemy.create_engine("postgresql://airflow:airflow@postgres:5432/staging")
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    # Drop the rejets linked to an etablissement that is not in the studied year etablissements table
+    result = engine.execute(f"SELECT identifiant FROM georisques_etablissements_{STUDIED_YEAR};").fetchall()
+    etablissements_ids = [id[0] for id in result]
+    rejets_studied_year_df = rejets_studied_year_df[rejets_studied_year_df['identifiant'].isin(etablissements_ids)]
+
+    table_name = "georisques_rejets_"+STUDIED_YEAR
+    if not sqlalchemy.inspect(engine).has_table(table_name):
+        with engine.connect() as conn:
+            rejets_studied_year_df.to_sql(table_name, conn, if_exists="replace", index=False)
+            conn.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT pk_{table_name} PRIMARY KEY(identifiant);")
+            conn.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT fk_{table_name} FOREIGN KEY(identifiant) REFERENCES georisques_etablissements_{STUDIED_YEAR}(identifiant);")
+    else:
+        existing_rejets = pandas.read_sql_table(table_name, engine)
+        new_rejets = pandas.concat([rejets_studied_year_df, existing_rejets]).drop_duplicates(keep=False)
+        if not new_rejets.empty:
+            with engine.connect() as conn:
+                new_rejets.to_sql(table_name, conn, if_exists="append", index=False)
 
 STEPS = [
     remove_unwanted_files,
@@ -125,6 +190,9 @@ STEPS = [
     strip_columns_name,
     strip_data,
     retrieve_coordinates,
+    create_georisques_etablissements_studied_year_sql_table,
+    create_georisques_emissions_studied_year_sql_table,
+    create_georisques_rejets_studied_year_sql_table,
 ]
 
 def execute_step(step_index: int):
