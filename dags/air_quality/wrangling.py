@@ -150,6 +150,7 @@ def create_air_quality_measurements_sql_table():
     if not sqlalchemy.inspect(engine).has_table("air_quality_measurements"):
         with engine.connect() as conn:
             measurements_cleaned_data.to_sql("air_quality_measurements", conn, if_exists="replace", index=False)
+            conn.execute("ALTER TABLE air_quality_measurements ALTER COLUMN date TYPE DATE USING to_date(date, 'DD/MM/YYYY');")
             conn.execute("ALTER TABLE air_quality_measurements ADD CONSTRAINT pk_aq_measurements PRIMARY KEY(national_station_code, pollutant, date);")
             conn.execute("ALTER TABLE air_quality_measurements ADD CONSTRAINT fk_aq_measurements FOREIGN KEY(national_station_code) REFERENCES air_quality_stations(national_station_code);")
     else:

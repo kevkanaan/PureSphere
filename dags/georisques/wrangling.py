@@ -215,8 +215,3 @@ def execute_step(step_index: int):
     print(f'Applying step {step_index}...')
     step(working_folder=step_folder)
     print(f'Step {step_index} has been applied')
-
-
-if __name__ == '__main__':
-    for index in range(1, len(STEPS) + 1):
-        execute_step(index)

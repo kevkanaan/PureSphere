@@ -31,7 +31,3 @@ def download_data() -> None:
         response = session.get(link)
         with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
             archive.extractall(DATA_PATH['LANDING_ZONE'])
-
-
-if __name__ == '__main__':
-    download_data()
