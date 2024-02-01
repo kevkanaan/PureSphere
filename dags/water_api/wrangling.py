@@ -4,10 +4,10 @@ from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy_utils import create_database, database_exists
 
-# LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
-# STAGING_ZONE_PATH = "/opt/airflow/data/staging/water-quality/"
-LANDING_ZONE_PATH = "./data/landing/water-quality/"
-STAGING_ZONE_PATH = "./data/staging/water-quality/"
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
+STAGING_ZONE_PATH = "/opt/airflow/data/staging/water-quality/"
+# LANDING_ZONE_PATH = "./data/landing/water-quality/"
+# STAGING_ZONE_PATH = "./data/staging/water-quality/"
 def get_stations_metadata_dataframe():
     return pd.read_csv(LANDING_ZONE_PATH+"stationpc.csv")
 
@@ -67,7 +67,7 @@ def create_water_quality_measurements_sql_table():
     if not database_exists(engine.url):
         create_database(engine.url)
     # Create the air_quality_measurements table
-    measurements_cleaned_data = pd.read_parquet(STAGING_ZONE_PATH+"analysispcwrangling.csv")
+    measurements_cleaned_data = pd.read_csv(STAGING_ZONE_PATH+"analysispcwrangling.csv")
     # Retrieve the stations codes from the stations table
     result = engine.execute("SELECT code_station FROM water_quality_stations;").fetchall()
     stations_code = [code[0] for code in result]

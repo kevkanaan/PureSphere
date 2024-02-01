@@ -3,8 +3,8 @@ import os
 import requests
 import pandas as pd
 
-#LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
-LANDING_ZONE_PATH = "./data/landing/water-quality/"
+LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
+#LANDING_ZONE_PATH = "./data/landing/water-quality/"
 
 def get_analysepc(params=None):
     """
