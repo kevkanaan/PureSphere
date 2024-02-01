@@ -40,7 +40,7 @@ with DAG(
                        python_callable=get_analysepc_filtered_year,
                        op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"},
                        trigger_rule="all_success")
-        
+
         PythonOperator(task_id="get_water_quality_stations_data",
                        python_callable=get_stationpc,
                        op_kwargs={'size': 20000},
