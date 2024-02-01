@@ -10,6 +10,7 @@ from airflow.utils.helpers import chain
 from airflow.utils.trigger_rule import TriggerRule
 
 from air_quality.wrangling import remove_invalid_measurements, drop_useless_columns, aggregate_measurement_by_site_code_and_pollutant_type, create_air_quality_station_sql_table, create_air_quality_measurements_sql_table
+from water_api.wrangling import wrangle_file, create_water_quality_station_sql_table, create_water_quality_measurements_sql_table
 import georisques.wrangling
 
 with DAG(
@@ -60,15 +61,15 @@ with DAG(
                                  bash_command="cp -f /opt/airflow/data/landing/water-quality/stationpc.csv /opt/airflow/data/staging/water-quality")
 
         second_step = PythonOperator(task_id="wrangle_file",
-                                    python_callable=remove_invalid_measurements,
+                                    python_callable=wrangle_file,
                                     trigger_rule="all_success")
 
         third_step = PythonOperator(task_id="create_water_quality_stations_sql_table",
-                                      python_callable=create_air_quality_station_sql_table,
+                                      python_callable=create_water_quality_station_sql_table,
                                       trigger_rule="all_success")
 
         fourth_step = PythonOperator(task_id="create_water_quality_measurements_sql_table",
-                                   python_callable=create_air_quality_measurements_sql_table,
+                                   python_callable=create_water_quality_measurements_sql_table,
                                    trigger_rule="all_success")
 
         first_step >> second_step >> third_step >> fourth_step

@@ -7,7 +7,7 @@ from airflow.operators.python import PythonOperator
 
 import georisques.download as georisques_download
 from air_quality.download import download_stations_details, download_daily_reports
-from water_api.download import get_analysepc_filtered_year
+from water_api.download import get_analysepc_filtered_year, get_stationpc
 
 with DAG(
     dag_id='ingest',
@@ -20,12 +20,13 @@ with DAG(
     @task_group(group_id="air_quality_ingestion")
     def air_quality_ingestion():
         get_air_quality_stations_details = PythonOperator(task_id="get_air_quality_stations_details",
-                                                          python_callable=download_stations_details
-                                                          )
+                                                          python_callable=download_stations_details,
+                                                          trigger_rule="all_success")
 
         get_air_quality_measures = PythonOperator(task_id="get_air_quality_measures",
                                                   python_callable=download_daily_reports,
-                                                  op_kwargs={'years':[2021, 2022, 2023]})
+                                                  op_kwargs={'years':[2021, 2022, 2023]},
+                                                  trigger_rule="all_success")
 
         get_air_quality_stations_details >> get_air_quality_measures
 
@@ -35,9 +36,15 @@ with DAG(
 
     @task_group(group_id="water_api_ingestion")
     def water_api_ingestion():
-        PythonOperator(task_id="get_water_api_data",
+        PythonOperator(task_id="get_water_quality_analysis_data",
                        python_callable=get_analysepc_filtered_year,
-                       op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"})
+                       op_kwargs={'year': 2021, 'chemical_components': "1319,1350,1383,1386"},
+                       trigger_rule="all_success")
+
+        PythonOperator(task_id="get_water_quality_stations_data",
+                       python_callable=get_stationpc,
+                       op_kwargs={'size': 20000},
+                       trigger_rule="all_success")
 
     end = EmptyOperator(task_id="ingestion_finished")
 

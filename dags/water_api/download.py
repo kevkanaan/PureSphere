@@ -213,13 +213,3 @@ def get_analysepc_location_date(latitude, longitude, distance, date):
         "sort": "desc"
     }
     return get_analysepc(params)
-
-def main():
-    params = {
-            "size": 20000
-        }
-
-    print(get_stationpc(params))
-
-if __name__ == "__main__":
-    main()
