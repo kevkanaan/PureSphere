@@ -53,6 +53,25 @@ with DAG(
 
         first_step >> second_step >> third_step >> fourth_step >> fifth_step >> sixth_step >> seventh_step
 
+    @task_group(group_id="water_quality_wrangling")
+    def water_quality_wrangling():
+
+        first_step = BashOperator(task_id="copy_stations_metadata_file",
+                                 bash_command="cp -f /opt/airflow/data/landing/water-quality/stationpc.csv /opt/airflow/data/staging/water-quality")
+
+        second_step = PythonOperator(task_id="wrangle_file",
+                                    python_callable=remove_invalid_measurements,
+                                    trigger_rule="all_success")
+
+        third_step = PythonOperator(task_id="create_water_quality_stations_sql_table",
+                                      python_callable=create_air_quality_station_sql_table,
+                                      trigger_rule="all_success")
+
+        fourth_step = PythonOperator(task_id="create_water_quality_measurements_sql_table",
+                                   python_callable=create_air_quality_measurements_sql_table,
+                                   trigger_rule="all_success")
+
+        first_step >> second_step >> third_step >> fourth_step
 
     @task_group(group_id="georisque_wrangling")
     def georisques_wrangling():
@@ -67,11 +86,6 @@ with DAG(
         ]
 
         chain(*tasks)
-
-
-    @task_group(group_id="water_quality_wrangling")
-    def water_quality_wrangling():
-        EmptyOperator(task_id="water_quality_wrangling")
 
     end = EmptyOperator(task_id="wrangling_finished")
 
