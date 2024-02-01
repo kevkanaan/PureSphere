@@ -3,6 +3,7 @@ DATA_PATH = {
     'STAGING_ZONE': '/opt/airflow/data/staging/georisques/',
 }
 RETRIEVE_FROM_YEAR = '2021'
+STUDIED_YEAR = '2021'
 KEPT_FILES = [
     'emissions.csv',
     'etablissements.csv',
