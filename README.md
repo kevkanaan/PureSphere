@@ -34,10 +34,14 @@ docker compose up airflow-init
 docker compose up
 ```
 
-The webserver is available at: http://localhost:8080. The default account has the login `airflow` and the password `airflow`. To connect to Postgres database using pgAdmin, the username is `airflow`. Before running the pipeline offline, make sure:
-- the folder [data/landing/air-quality/2021](data/landing/air-quality/2021/) containing all the daily measurement files. 
+The webserver is available at: http://localhost:8080. The default account has the login `airflow` and the password `airflow`. To connect to Postgres database using pgAdmin, the username is `airflow`.
+
+If you want to run the pipeline offline, make sure:
+- the folder [data/landing/air-quality/2021](data/landing/air-quality/2021/) contains all the daily measurement files. 
 - the folder [data/landing/georisques/2021](data/landing/georisques/2021/) contains its 8 CSV files
 -  the folder [data/landing/water-quality](data/landing/water-quality/) contains both `analysispc2021` and `stationpc.csv`
+
+Then, simply skip the ingestion pipeline as it is not made to run offline and starts directly from the wrangling pipeline.
 
 ## Set up Spark connection
 Within Airflow webserver, create a new connection to Spark. To do so:
