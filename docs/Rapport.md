@@ -9,7 +9,7 @@ The goal of PureSphere is to collect data to check how French industrial sites i
 
 Our objective is to answer the 2 following questions for France in 2021:
 - What are the zones for which we have information about the air quality and the water quality?
-- Can we see the impact of industrial sites on their surrounding area in terms of air and water quality?
+- What is the proportion of industrial sites having a monitoring station in a 10km radius zone ?
 
 ### Data ingestion 
 Our [ingestion pipeline](../dags/ingest.py) downloads data from 3 different sources:
@@ -35,15 +35,36 @@ Geod'air landing data consists of daily files containing hourly averaged measure
 At each step, we stored the data in transient folders so that we keep track of what we did before and we don't have to re-run all the steps in case of a failure when building the pipeline. At the end of the wrangling and enrichment, we store the cleaned data in a persistent Postgres database called staging. Some constraints (primary key, foreign key) are applied between the different tables coming from the same source so that we are sure to have no mismatch when moving to production. Some entries were dropped at this moment (for example a data refering to a station not listed in the station metadata file).
 
 ### Production
-To answer the first question, we simply retrieves all the water quality stations and air quality stations that were working in 2021 and merge them in a single table.
+To answer the first question, we simply retrieves all the water quality stations and air quality stations that were working in 2021 and merge them in a single table. This table is stored in Postgres production database.
 
- Then, to answer the second question, we have created a graph database using Neo4J. The hardest and trickiest part is to map the industrial sites to their surrounding monitoring stations based on their coordinates. To do this, we have used Geopy and its distance functions. Considering the large number of stations, we decided arbitrarily that a station is monitoring an industrial site if it is located in a 10km radius zone around the site. We stored the result of this mapping inside the table called `industrial_sites_monitoring_stations_2021`. All the air quality stations, regardless of their functionning year, are already mapped to an industrial site so that it is already done for later analysis. For the sake of accelerating the pipeline, this table is exported as a CSV file in the [production data](../data/production/industrial_sites_monitoring_stations_2021.csv). Inside our Neo4J database, we have 3 entities: IndustrialSites, Station:WaterQuality and Station:AirQuality. Each of them carries enough data to retrieve the measurements from the measurements tables stored inside the staging database and answer our question.
+ Then, to answer the second question, we have created a graph database using Neo4J. The hardest and trickiest part is to map the industrial sites to their surrounding monitoring stations based on their coordinates. To do this, we have used Geopy and its distance functions. Considering the large number of stations, we decided arbitrarily that a station is monitoring an industrial site if it is located in a 10km radius zone around the site. We stored the result of this mapping inside the table called `industrial_sites_monitoring_stations_2021`. All the air quality stations, regardless of their functionning year, are already mapped to an industrial site so that it is already done for later analysis. For the sake of accelerating the pipeline, this table is exported as a CSV file in the [production data](../data/production/industrial_sites_monitoring_stations_2021.csv). Inside our Neo4J database, we have 3 entities: IndustrialSites, Station:WaterQuality and Station:AirQuality. Each of them carries enough data to retrieve the measurements from the measurements tables stored inside the staging database and answer our question. A Monitor relationship exists between an IndustrialSite and a Station node if the station is in the 10km radius zone. To visualize the data, you can go to our [Neo4J web server](http://localhost:7474/), connect to  [Neo4J database](localhost:7687) and execute this Cipher query:
+ `MATCH (s:Station)-[:MONITOR]->(i:IndustrialSite) RETURN s,i`
 
  ### Future works
- The first step to properly answer our questions would be to develop data visualisations. Then, further works need to be done to be able to run an analysis for a given period of time. Finally, we should use MongoDB to cache our data during the staging.
+ The first step to properly answer our questions would be to develop data visualisations. Then, further works need to be done to be able to run an analysis for a given period of time. Finally, we should use MongoDB to cache our data during the staging and try to extend our use of Spark to accelerate even further the pipeline.
 
  ### Difficulties encountered
  This project took a lot of time to be completed because debugging is hard when you're pipeline fails after 3 hours of computing. Tom had to add another 8 BG of RAM inside his computer otherwise he wasn't able to run the pipeline at all.
 
  ### Acknowledgement
- We kindly thank Riccardo Tommasini for his help throughout the project! 
+ We kindly thank Riccardo Tommasini for his help throughout the project!
+
+ ### Submissions checklist
+ - [x] Repository with the code well documented including
+    - [x] docker-compose file to run the environment
+    - [x] Detailed description of the various steps
+    - [x] Report with the project design steps (divided per area)
+    - [ ] Example dataset: the project testing should work offline, i.e., you need to have some sample data points
+    - [x] Slides for the project presentation
+
+### Project grading
+- [x] Using Airflow + Pandas + MongoDB + Postgres + Neo4J (any deficiency MUST be justiied)
+- [ ] +1 points using REDIS for speeding up steps
+- [ ] +1 points STAR schema design includes maintenance upon update
+- [ ] +1 Creativity: data viz, serious analysis, performance analysis, extensive cleansing.
+- [ ] +1 using Kafka for ingestion and staging (also + docker)
+
+### Extra technologies
+- [x] Parquet files for efficiency and  to limit disk usage
+- [x] Apache Spark to accelerate tidious and easily parallelizable step.
+- [x] Advanced use of GitHub with automatic linting of the code to respect Python coding norm, Github repository link to our private Discord server for the project to have real-time update on the evolution of the repository.
