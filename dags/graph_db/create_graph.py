@@ -4,7 +4,7 @@ import sqlalchemy
 import pandas as pd
 from geopy import distance
 from sqlalchemy_utils import create_database, database_exists
-import georisques.constants as constants
+from georisques import constants
 
 PRODUCTION_ZONE = '/opt/airflow/data/production/'
 RADIUS = 10.0       # Radius to map a monitoring station to an industrial site
@@ -12,7 +12,7 @@ RADIUS = 10.0       # Radius to map a monitoring station to an industrial site
 def find_air_quality_stations_in_radius(center, radius:float):
     engine = sqlalchemy.create_engine('postgresql://airflow:airflow@postgres:5432/staging')
     conn = engine.connect()
-    air_quality_stations_df = pd.read_sql_query(f"""SELECT national_station_code, latitude, longitude
+    air_quality_stations_df = pd.read_sql_query("""SELECT national_station_code, latitude, longitude
                                             FROM air_quality_stations""", conn)
     air_quality_stations_df["distance"] = air_quality_stations_df.apply(lambda row: distance.distance(center, (row["latitude"], row["longitude"])).km, axis=1)
     air_quality_stations_df = air_quality_stations_df[air_quality_stations_df["distance"] <= radius]
@@ -23,7 +23,7 @@ def find_air_quality_stations_in_radius(center, radius:float):
 def find_water_quality_stations_in_radius(center, radius:float):
     engine = sqlalchemy.create_engine('postgresql://airflow:airflow@postgres:5432/staging')
     conn = engine.connect()
-    water_quality_stations_df = pd.read_sql_query(f"""SELECT code_station, libelle_station, latitude, longitude
+    water_quality_stations_df = pd.read_sql_query("""SELECT code_station, libelle_station, latitude, longitude
                                                 FROM water_quality_stations""", conn)
     water_quality_stations_df["distance"] = water_quality_stations_df.apply(lambda row: distance.distance(center, (row["latitude"], row["longitude"])).km, axis=1)
     water_quality_stations_df = water_quality_stations_df[water_quality_stations_df["distance"] <= radius]
@@ -36,9 +36,9 @@ def create_monitoring_stations_sql_table():
     stag_engine = sqlalchemy.create_engine("postgresql://airflow:airflow@postgres:5432/staging")
 
     # Read stations table from staging database and prepare them to be concatened using Pandas
-    water_quality_stations_df = pd.read_sql_query(f"""SELECT code_station AS identifiant, libelle_station AS name, latitude, longitude
+    water_quality_stations_df = pd.read_sql_query("""SELECT code_station AS identifiant, libelle_station AS name, latitude, longitude
                                                 FROM water_quality_stations""", stag_engine)
-    air_quality_stations_df = pd.read_sql_query(f"""SELECT national_station_code AS identifiant, name, latitude, longitude, activity_begin, activity_end
+    air_quality_stations_df = pd.read_sql_query("""SELECT national_station_code AS identifiant, name, latitude, longitude, activity_begin, activity_end
                                             FROM air_quality_stations""", stag_engine)
     water_quality_stations_df["type"] = "water_quality"
     air_quality_stations_df["type"] = "air_quality"
@@ -160,9 +160,9 @@ def create_graph_db():
 
     monitored_by_relationships = []
 
-    for id, industrial_node in industrial_nodes.items():
-        if id in industrial_sites_monitoring_map:
-            stations_mapping = industrial_sites_monitoring_map[id]
+    for identifiant, industrial_node in industrial_nodes.items():
+        if identifiant in industrial_sites_monitoring_map:
+            stations_mapping = industrial_sites_monitoring_map[identifiant]
             if "air_quality_stations" in stations_mapping:
                 for air_quality_station_code in stations_mapping["air_quality_stations"]:
                     try:

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from airflow import DAG
-from airflow.decorators import task, task_group
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from graph_db.create_graph import create_graph_db, identify_monitoring_stations_for_industrial_site, create_monitoring_stations_sql_table
@@ -17,7 +16,7 @@ with DAG(
     create_stations_sql_table = PythonOperator(task_id="create_monitoring_stations_sql_table",
                                                                     python_callable=create_monitoring_stations_sql_table,
                                                                     trigger_rule="all_success")
-    
+
     match_industrial_site_to_monitoring_stations = PythonOperator(task_id="match_industrial_site_to_monitoring_stations",
                                                                     python_callable=identify_monitoring_stations_for_industrial_site,
                                                                     trigger_rule="all_success")
