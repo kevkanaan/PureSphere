@@ -34,7 +34,10 @@ docker compose up airflow-init
 docker compose up
 ```
 
-The webserver is available at: http://localhost:8080. The default account has the login `airflow` and the password `airflow`.
+The webserver is available at: http://localhost:8080. The default account has the login `airflow` and the password `airflow`. To connect to Postgres database using pgAdmin, the username is `airflow`. Before running the pipeline offline, make sure:
+- the folder [data/landing/air-quality/2021](data/landing/air-quality/2021/) containing all the daily measurement files. 
+- the folder [data/landing/georisques/2021](data/landing/georisques/2021/) contains its 8 CSV files
+-  the folder [data/landing/water-quality](data/landing/water-quality/) contains both `analysispc2021` and `stationpc.csv`
 
 ## Set up Spark connection
 Within Airflow webserver, create a new connection to Spark. To do so:
@@ -82,9 +85,9 @@ The retrieved data are stored in the `/data` folder. The data are stored in 3 "z
 ### Pipelines
 
 The pipelines are defined in the `/dags` folder:
-1. `ingest.py`: responsible to bring raw data to the landing zone
-2. `wrangle.py`: responsible to migrate raw data from the landing zone and move them into the staging area (cleaning, wrangling, transformation, etc.)
-3. `production.py`: responsible to move the data from the staging zone into the production zone, and trigger the update of data marts (views)
+1. `ingest.py`: responsible to bring raw data to the landing zone. It takes approximately 15min to run.
+2. `wrangle.py`: responsible to migrate raw data from the landing zone and move them into the staging area (cleaning, wrangling, transformation, etc.). Again, it takes approximately 15min to run.
+3. `production.py`: responsible to move the data from the staging zone into the production zone, and trigger the update of data marts (views). The data mart consist of a SQL table located in Postgres `production` db and a toy graph database stored in Neo4J. Build the whole graph requires hours, so we have restricted it to 1000 relations for the sake of illustration.
 
 ### Useful links
 | Service      |       URL      |
