@@ -4,6 +4,7 @@ beautifulsoup4
 xlrd
 pyarrow
 pyspark
+geopy
+py2neo
 apache-airflow[postgres]
 apache-airflow-providers-apache-spark
-geopy

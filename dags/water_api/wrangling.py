@@ -6,8 +6,7 @@ from sqlalchemy_utils import create_database, database_exists
 
 LANDING_ZONE_PATH = "/opt/airflow/data/landing/water-quality/"
 STAGING_ZONE_PATH = "/opt/airflow/data/staging/water-quality/"
-# LANDING_ZONE_PATH = "./data/landing/water-quality/"
-# STAGING_ZONE_PATH = "./data/staging/water-quality/"
+
 def get_stations_metadata_dataframe():
     return pd.read_csv(LANDING_ZONE_PATH+"stationpc.csv", sep=";")
 
@@ -74,16 +73,14 @@ def create_water_quality_measurements_sql_table():
     measurements_cleaned_data = measurements_cleaned_data[measurements_cleaned_data['station_code'].isin(stations_code)]
     measurements_cleaned_data.drop_duplicates(subset=["station_code", "date", "libelle_parametre"], inplace=True)
     measurements_cleaned_data.rename(columns={"station_code":"code_station"}, inplace=True)
-    measurements_cleaned_data["date"] = measurements_cleaned_data["date"].apply(lambda x: "/".join([x.split("-")[-1], x.split("-")[1], x.split("-")[0]]))
     if not sqlalchemy.inspect(engine).has_table("water_quality_measurements"):
         with engine.connect() as conn:
             measurements_cleaned_data.to_sql("water_quality_measurements", conn, if_exists="replace", index=False)
-            conn.execute("ALTER TABLE water_quality_measurements ALTER COLUMN date TYPE DATE USING to_date(date, 'DD/MM/YYYY');")
             conn.execute("ALTER TABLE water_quality_measurements ADD CONSTRAINT pk_wq_measurements PRIMARY KEY(code_station, date, libelle_parametre);")
             conn.execute("ALTER TABLE water_quality_measurements ADD CONSTRAINT fk_wq_measurements FOREIGN KEY(code_station) REFERENCES water_quality_stations(code_station);")
     else:
         existing_measurements = pd.read_sql_table("water_quality_measurements", engine)
-        new_measurements = pd.concat([existing_measurements, measurements_cleaned_data]).drop_duplicates(['station_code', 'date', 'libelle_parametre'], keep=False)
+        new_measurements = pd.concat([existing_measurements, measurements_cleaned_data]).drop_duplicates(['code_station', 'date', 'libelle_parametre'], keep=False)
         if not new_measurements.empty:
             with engine.connect() as conn:
                 new_measurements.to_sql("water_quality_measurements", conn, if_exists="append", index=False)

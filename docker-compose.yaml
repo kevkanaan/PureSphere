@@ -75,6 +75,17 @@ services:
       start_period: 30s
     restart: always
 
+  neo:
+    image: neo4j
+    ports:
+        - 7474:7474
+        - 7687:7687
+    restart: always
+    environment:
+      - NEO4J_AUTH=none
+    volumes:
+      - ./neo4j/data:/data
+
   spark-master:
     <<: *spark-common
     command: bin/spark-class org.apache.spark.deploy.master.Master

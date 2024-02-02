@@ -34,7 +34,9 @@ def download_daily_reports(years: List[int]):
         for a in soup.select('a[href*=csv]'):
             filename = a['href']
             if not os.path.exists(LANDING_ZONE_PATH+f"{year}/{filename[:-4]}"):
+                print(f"https://files.data.gouv.fr/lcsqa/concentrations-de-polluants-atmospheriques-reglementes/temps-reel/{year}/{filename}")
                 r = requests.get(f"https://files.data.gouv.fr/lcsqa/concentrations-de-polluants-atmospheriques-reglementes/temps-reel/{year}/{filename}")
                 decoded_file = StringIO(r.content.decode("utf-8"))
                 report_df = pd.read_csv(decoded_file, sep=";")
-                report_df.to_parquet(LANDING_ZONE_PATH+f"{year}/{filename[:-4]}")
+                if not report_df.empty:
+                    report_df.to_parquet(LANDING_ZONE_PATH+f"{year}/{filename[:-4]}")
